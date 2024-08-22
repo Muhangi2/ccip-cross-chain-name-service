@@ -87,4 +87,5 @@ contract CrossChainNameServiceRegister is OwnerIsCreator {
         (bool sent, ) = beneficiary.call{value: amount}("");
         require(sent, "Failed to withdraw");
     }
+
 }

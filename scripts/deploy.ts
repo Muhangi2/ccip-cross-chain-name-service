@@ -1,13 +1,14 @@
 import { ethers } from "hardhat";
+import config from '../hardhat.config';
 
-interface Setup {
-    chainSelector: bigint;
-    sourceRouter: string;
-    destinationRouter: string;
-    wrappedNative: string;
-    linkToken: string;
-    ccipB: string;
-    ccipL: string;
+interface Config {
+    chainSelector_: bigint;
+    sourceRouter_: string;
+    destinationRouter_: string;
+    wrappedNative_: string;
+    linkToken_: string;
+    ccipBnM_: string;
+    ccipLnM_: string;
 }
 
 interface DeploymentReturns {
@@ -17,7 +18,7 @@ interface DeploymentReturns {
     ICrossChainNameServiceRegister: any;
     ICrossChainNameServiceLookup: any;
     CrossChainNameServiceReceiver: any;
-    setup: Setup;
+    setup: Config;
     GAS_LIMIT: number;
     deployer: any;
     alice: any;
@@ -32,10 +33,12 @@ async function deployCrossChainNameService(): Promise<DeploymentReturns> {
     // Deploy the local simulator
     const localSimulatorFactory = await ethers.getContractFactory("CCIPLocalSimulator");
     const localSimulator = await localSimulatorFactory.deploy();
-    await localSimulator.deployed();
+
     console.log("CCIPLocalSimulator deployed to:", localSimulator.address);
 
-    const setup: Setup = await localSimulator.configuration();
+    const setup: Config = await localSimulator.configuration();
+    
+
 
     // Deploy CrossChainNameServiceLookup contracts for both the source and destination
     const CrossChainNameService = await ethers.getContractFactory("CrossChainNameServiceLookup");
@@ -50,14 +53,14 @@ async function deployCrossChainNameService(): Promise<DeploymentReturns> {
     // Deploy the CrossChainNameServiceRegister for both the source and destination
     const CrossChainNameServiceRegisterSource = await ethers.getContractFactory("CrossChainNameServiceRegister");
     const CrossChainNameServiceRegister = await CrossChainNameServiceRegisterSource.deploy(
-        setup.sourceRouter,
+        setup.sourceRouter_,
         CrossChainNameServiceLookup.address
     );
     await CrossChainNameServiceRegister.deployed();
     console.log("CrossChainNameServiceRegister deployed to:", CrossChainNameServiceRegister.address);
 
     const ICrossChainNameServiceRegister = await CrossChainNameServiceRegisterSource.deploy(
-        setup.destinationRouter,
+        setup.destinationRouter_,
         ICrossChainNameServiceLookup.address
     );
     await ICrossChainNameServiceRegister.deployed();
@@ -66,9 +69,9 @@ async function deployCrossChainNameService(): Promise<DeploymentReturns> {
     // Deploy CrossChainNameServiceReceiver contract
     const CrossChainNameServiceFactory = await ethers.getContractFactory('CrossChainNameServiceReceiver');
     const CrossChainNameServiceReceiver = await CrossChainNameServiceFactory.deploy(
-        setup.sourceRouter,
+        setup.sourceRouter_,
         ICrossChainNameServiceLookup.address,
-        setup.chainSelector
+        setup.chainSelector_
     );
     await CrossChainNameServiceReceiver.deployed();
     console.log("CrossChainNameServiceReceiver deployed to:", CrossChainNameServiceReceiver.address);
@@ -91,7 +94,7 @@ async function main() {
     try {
         const deployment = await deployCrossChainNameService();
         console.log("Deployment completed successfully");
-        console.log(deployment);
+        // console.log(deployment);
     } catch (error) {
         console.error("Error during deployment:", error);
         process.exit(1);
