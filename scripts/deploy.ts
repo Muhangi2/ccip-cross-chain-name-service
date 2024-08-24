@@ -1,5 +1,5 @@
 import { ethers } from "hardhat";
-import config from '../hardhat.config';
+
 
 interface Config {
     chainSelector_: bigint;
@@ -24,7 +24,7 @@ interface DeploymentReturns {
     alice: any;
 }
 
-async function deployCrossChainNameService(): Promise<DeploymentReturns> {
+export async function deployCrossChainNameService(): Promise<DeploymentReturns> {
     const [deployer, alice] = await ethers.getSigners();
     const GAS_LIMIT = 1_000_000;
 
@@ -37,7 +37,7 @@ async function deployCrossChainNameService(): Promise<DeploymentReturns> {
     console.log("CCIPLocalSimulator deployed to:", localSimulator.address);
 
     const setup: Config = await localSimulator.configuration();
-    
+
 
 
     // Deploy CrossChainNameServiceLookup contracts for both the source and destination
